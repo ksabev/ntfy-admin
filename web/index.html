@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>ntfy admin</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- login -->
+  <main id="login" class="login hidden">
+    <form id="login-form" class="card login-card" autocomplete="on">
+      <div class="brand"><img src="favicon.svg" alt="" class="brand-icon"> ntfy admin</div>
+      <p class="muted">Log in with an ntfy <b>admin</b> account.</p>
+      <label>Username <input name="username" autocomplete="username" required autofocus></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="btn primary" type="submit">Log in</button>
+      <p id="login-error" class="error" role="alert"></p>
+    </form>
+  </main>
+
+  <!-- app -->
+  <div id="app" class="hidden">
+    <header class="topbar">
+      <div class="brand"><img src="favicon.svg" alt="" class="brand-icon"> ntfy admin</div>
+      <div id="server-info" class="server-info"></div>
+      <div class="spacer"></div>
+      <span id="whoami" class="muted"></span>
+      <button id="logout" class="btn ghost small">Log out</button>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab" data-tab="users" role="tab">Users</button>
+      <button class="tab" data-tab="topics" role="tab">Topics</button>
+      <button class="tab" data-tab="matrix" role="tab">Access matrix</button>
+      <button class="tab" data-tab="everyone" role="tab">Anonymous</button>
+    </nav>
+
+    <div id="banner" class="banner hidden"></div>
+
+    <section id="tab-users" class="tabpanel">
+      <div class="toolbar">
+        <input id="user-filter" class="search" placeholder="Filter users…" type="search">
+        <div class="spacer"></div>
+        <a id="export" class="btn ghost" href="api/export">Export YAML</a>
+        <button id="add-user" class="btn primary">+ New user</button>
+      </div>
+      <div id="users" class="users"></div>
+    </section>
+
+    <section id="tab-topics" class="tabpanel hidden">
+      <div class="toolbar">
+        <p class="muted grow">ntfy has no topic list: these are topics named in access rules, plus the ones you added notes to.
+          Notes give phones a friendly name when subscribing by QR.</p>
+        <button id="add-topic" class="btn primary">+ Topic note</button>
+      </div>
+      <div id="topics"></div>
+    </section>
+
+    <section id="tab-matrix" class="tabpanel hidden">
+      <p class="muted">Effective permission per user and topic, resolved like ntfy does: the user's own most specific rule,
+        then the anonymous rules, then the server default. Click a cell to set an exact rule.</p>
+      <div id="matrix" class="matrix-wrap"></div>
+    </section>
+
+    <section id="tab-everyone" class="tabpanel hidden">
+      <div id="everyone"></div>
+    </section>
+  </div>
+
+  <dialog id="dialog"><form method="dialog" id="dialog-form"></form></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

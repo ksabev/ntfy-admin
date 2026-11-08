@@ -1,0 +1,41 @@
+# Local test bed: real ntfy + two panels (admin socket / plain HTTP).
+#   docker compose -f test/compose.yml up -d --build && test/e2e.sh
+name: ntfy-admin-test
+services:
+  ntfy:
+    image: binwiederhier/ntfy:v2.37.2
+    command: ["serve"]
+    environment:
+      NTFY_BASE_URL: http://localhost:18080
+      NTFY_AUTH_FILE: /var/lib/ntfy/user.db
+      NTFY_AUTH_DEFAULT_ACCESS: deny-all
+      NTFY_EXPERIMENTAL_LISTEN_ADMIN_UNIX: /run/ntfy/admin.sock
+    volumes:
+      - ntfy-lib:/var/lib/ntfy
+      - ntfy-run:/run/ntfy
+    ports: ["127.0.0.1:18080:80"]
+
+  admin-socket:
+    build: ..
+    environment:
+      NTFY_ADMIN_NTFY_URL: http://ntfy:80
+      NTFY_ADMIN_SOCKET: /run/ntfy/admin.sock
+    group_add: ["0"]          # ntfy runs as root here: socket is root:root 0660
+    volumes:
+      - ntfy-run:/run/ntfy
+      - panel-data:/data
+    ports: ["127.0.0.1:18081:8080"]
+    depends_on: [ntfy]
+
+  admin-http:
+    build: ..
+    environment:
+      NTFY_ADMIN_NTFY_URL: http://ntfy:80
+      NTFY_ADMIN_PUBLIC_URL: https://ntfy.example.com
+    ports: ["127.0.0.1:18082:8080"]
+    depends_on: [ntfy]
+
+volumes:
+  ntfy-lib:
+  ntfy-run:
+  panel-data:
