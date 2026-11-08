@@ -1,0 +1,66 @@
+# ntfy + ntfy-admin (regular panel) + ntfy-admin-super (admin socket, red UI).
+# See docs/install.md. Before the first start:
+#   mkdir -p ntfy-admin && sudo chown 65532:65532 ntfy-admin
+# After the first start, create the first admin:
+#   docker compose exec ntfy ntfy user add --role=admin admin
+
+services:
+  ntfy:
+    image: binwiederhier/ntfy:v2.37.2
+    command: ["serve"]
+    environment:
+      NTFY_BASE_URL: https://ntfy.example.com
+      NTFY_CACHE_FILE: /var/cache/ntfy/cache.db
+      NTFY_AUTH_FILE: /var/lib/ntfy/user.db
+      NTFY_AUTH_DEFAULT_ACCESS: deny-all
+      NTFY_BEHIND_PROXY: "true"
+      # Serves the admin API without credentials to whoever can open the socket.
+      # Only the super panel mounts it.
+      NTFY_EXPERIMENTAL_LISTEN_ADMIN_UNIX: /run/ntfy/admin.sock
+    volumes:
+      - ./ntfy/cache:/var/cache/ntfy
+      - ./ntfy/lib:/var/lib/ntfy
+      - ntfy-run:/run/ntfy
+    ports:
+      - "8082:80"
+    restart: unless-stopped
+
+  # Day-to-day panel: users, rules, tokens, onboarding. HTTP admin API only.
+  ntfy-admin:
+    image: ntfy-admin:latest
+    environment:
+      # Seed the first server on first start; afterwards manage servers in the UI.
+      NTFY_ADMIN_SERVER_NAME: Home
+      NTFY_ADMIN_NTFY_URL: http://ntfy:80
+      NTFY_ADMIN_PUBLIC_URL: https://ntfy.example.com
+      NTFY_ADMIN_SOCKET: /run/ntfy/admin.sock   # stored for the super panel; ignored here
+      NTFY_ADMIN_BEHIND_PROXY: "true"           # if a reverse proxy sits in front
+    volumes:
+      - ./ntfy-admin:/data
+    ports:
+      - "8083:8080"
+    depends_on: [ntfy]
+    restart: unless-stopped
+
+  # Rare jobs: roles and admin users, over ntfy's admin socket. Red UI on purpose.
+  ntfy-admin-super:
+    image: ntfy-admin:latest
+    # ntfy runs as root in its image, so the socket is root:root 0660.
+    # gid 0 opens it; the process stays a non-root user. (Or: group_add: ["0"] on compose v2+.)
+    user: "65532:0"
+    environment:
+      NTFY_ADMIN_SUPER: "true"
+      NTFY_ADMIN_SERVER_NAME: Home
+      NTFY_ADMIN_NTFY_URL: http://ntfy:80
+      NTFY_ADMIN_PUBLIC_URL: https://ntfy.example.com
+      NTFY_ADMIN_SOCKET: /run/ntfy/admin.sock
+    volumes:
+      - ntfy-run:/run/ntfy
+      - ./ntfy-admin:/data                      # shared with the regular panel
+    ports:
+      - "127.0.0.1:8084:8080"                   # keep it close; see docs/security.md
+    depends_on: [ntfy]
+    restart: unless-stopped
+
+volumes:
+  ntfy-run:
