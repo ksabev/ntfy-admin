@@ -14,7 +14,8 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
 FROM gcr.io/distroless/static-debian12:nonroot
 LABEL org.opencontainers.image.title="ntfy-admin" \
       org.opencontainers.image.description="Web admin panel for self-hosted ntfy: users, access rules, tokens, onboarding QR codes" \
-      org.opencontainers.image.licenses="Apache-2.0"
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.source="https://github.com/ksabev/ntfy-admin"
 COPY --from=build /out/ntfy-admin /ntfy-admin
 COPY --from=build --chown=65532:65532 /out/data /data
 ENV NTFY_ADMIN_DATA_DIR=/data

@@ -92,4 +92,5 @@ ntfy logs the same changes on its side, tagged `admin`.
 
 ## Reporting a problem
 
-Open an issue, or for anything sensitive, contact the maintainer directly.
+Open an issue at https://github.com/ksabev/ntfy-admin/issues. For anything sensitive,
+use GitHub's private vulnerability reporting (*Security → Report a vulnerability*).
