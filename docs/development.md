@@ -97,8 +97,15 @@ a JS syntax check, and the full end-to-end suite against a real ntfy. A push to 
 publishes `ghcr.io/ksabev/ntfy-admin:edge`. A `v*` tag publishes the release tags
 (`0.2.1`, `0.2`, `latest`) for amd64, arm64 and armv7.
 
-To make a release: update `CHANGELOG.md`, then
-`git tag -a v0.2.1 -m "…" && git push github main v0.2.1`.
+To make a release: update `CHANGELOG.md`, push `main`, then tag and push the tag **on
+its own**. If the branch and the tag go in one push, GitHub can skip the tag event and
+no release image gets built:
+
+```sh
+git push github main
+git tag -a v0.2.2 -m "…"
+git push github v0.2.2
+```
 
 ## Building
 
