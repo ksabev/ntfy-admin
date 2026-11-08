@@ -9,17 +9,21 @@ import (
 	"time"
 )
 
-// Config comes from the environment only (container friendly).
+// Config comes from the environment. The NTFY_ADMIN_NTFY_URL / _PUBLIC_URL /
+// _SOCKET / _SERVER_NAME variables only seed the first server on first start;
+// after that, servers are managed in the UI (DATA_DIR/servers.json), unless
+// NTFY_ADMIN_LOCK_SERVERS=true.
 type Config struct {
 	Listen       string        // NTFY_ADMIN_LISTEN, default :8080
-	NtfyURL      string        // NTFY_ADMIN_NTFY_URL: how this container reaches ntfy, e.g. http://ntfy:80
-	PublicURL    string        // NTFY_ADMIN_PUBLIC_URL: how phones reach ntfy (QR codes, examples); default: ntfy's base-url
-	AdminSocket  string        // NTFY_ADMIN_SOCKET: optional path to ntfy's admin unix socket (full admin powers)
-	DataDir      string        // NTFY_ADMIN_DATA_DIR: topic notes (display names, descriptions)
+	DataDir      string        // NTFY_ADMIN_DATA_DIR: servers.json + topic notes (no secrets)
 	SessionTTL   time.Duration // NTFY_ADMIN_SESSION_TTL, default 12h
 	CookieSecure string        // NTFY_ADMIN_COOKIE_SECURE: auto | true | false
 	BasePath     string        // NTFY_ADMIN_BASE_PATH: serve under a sub-path behind a proxy, e.g. /admin
 	BehindProxy  bool          // NTFY_ADMIN_BEHIND_PROXY: trust X-Forwarded-For for the client IP
+	LockServers  bool          // NTFY_ADMIN_LOCK_SERVERS: server list is read-only in the UI
+	Super        bool          // NTFY_ADMIN_SUPER: super admin mode: use admin sockets (roles, admin users); red UI
+
+	Seed ServerConfig // first server, from NTFY_ADMIN_NTFY_URL etc.
 }
 
 func env(key, def string) string {
@@ -29,30 +33,43 @@ func env(key, def string) string {
 	return def
 }
 
+func checkURL(name, raw string) error {
+	if raw == "" {
+		return nil
+	}
+	u, err := url.Parse(raw)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		return fmt.Errorf("%s: want an http(s) URL, got %q", name, raw)
+	}
+	return nil
+}
+
 func loadConfig() (*Config, error) {
 	c := &Config{
 		Listen:       env("NTFY_ADMIN_LISTEN", ":8080"),
-		NtfyURL:      strings.TrimRight(env("NTFY_ADMIN_NTFY_URL", "http://ntfy:80"), "/"),
-		PublicURL:    strings.TrimRight(env("NTFY_ADMIN_PUBLIC_URL", ""), "/"),
-		AdminSocket:  env("NTFY_ADMIN_SOCKET", ""),
 		DataDir:      env("NTFY_ADMIN_DATA_DIR", "/data"),
 		CookieSecure: strings.ToLower(env("NTFY_ADMIN_COOKIE_SECURE", "auto")),
 		BasePath:     strings.TrimRight(env("NTFY_ADMIN_BASE_PATH", ""), "/"),
 		BehindProxy:  env("NTFY_ADMIN_BEHIND_PROXY", "false") == "true",
+		LockServers:  env("NTFY_ADMIN_LOCK_SERVERS", "false") == "true",
+		Super:        env("NTFY_ADMIN_SUPER", "false") == "true",
+		Seed: ServerConfig{
+			Name:      env("NTFY_ADMIN_SERVER_NAME", ""),
+			URL:       strings.TrimRight(env("NTFY_ADMIN_NTFY_URL", ""), "/"),
+			PublicURL: strings.TrimRight(env("NTFY_ADMIN_PUBLIC_URL", ""), "/"),
+			Socket:    env("NTFY_ADMIN_SOCKET", ""),
+		},
 	}
 	ttl, err := time.ParseDuration(env("NTFY_ADMIN_SESSION_TTL", "12h"))
 	if err != nil || ttl < 5*time.Minute {
 		return nil, fmt.Errorf("NTFY_ADMIN_SESSION_TTL: want a duration >= 5m, e.g. 12h")
 	}
 	c.SessionTTL = ttl
-	for name, raw := range map[string]string{"NTFY_ADMIN_NTFY_URL": c.NtfyURL, "NTFY_ADMIN_PUBLIC_URL": c.PublicURL} {
-		if raw == "" {
-			continue
-		}
-		u, err := url.Parse(raw)
-		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
-			return nil, fmt.Errorf("%s: want an http(s) URL, got %q", name, raw)
-		}
+	if err := checkURL("NTFY_ADMIN_NTFY_URL", c.Seed.URL); err != nil {
+		return nil, err
+	}
+	if err := checkURL("NTFY_ADMIN_PUBLIC_URL", c.Seed.PublicURL); err != nil {
+		return nil, err
 	}
 	switch c.CookieSecure {
 	case "auto", "true", "false":

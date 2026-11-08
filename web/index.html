@@ -10,12 +10,35 @@
   <script src="app.js" defer></script>
 </head>
 <body>
+  <div class="super-strip" aria-hidden="true"></div>
+
+  <!-- first start: no servers yet -->
+  <main id="setup" class="login hidden">
+    <form id="setup-form" class="card login-card wide" autocomplete="off">
+      <div class="brand"><img src="favicon.svg" alt="" class="brand-icon"> ntfy admin <span class="super-only badge super">SUPER</span></div>
+      <h2>Connect your ntfy server</h2>
+      <p class="muted">No server configured yet. Point the panel at ntfy and log in with an ntfy <b>admin</b> account;
+        the server is saved only if the login works.</p>
+      <label>Name <input name="name" placeholder="e.g. House"></label>
+      <label>URL the panel uses <input name="url" required placeholder="http://ntfy:80" type="url"></label>
+      <label>Public URL (phones, QR codes) <input name="public_url" placeholder="https://ntfy.example.com" type="url"></label>
+      <label class="super-only">Admin socket <input name="socket" placeholder="/run/ntfy/admin.sock"></label>
+      <div class="row2">
+        <label>Admin username <input name="username" required autocomplete="username"></label>
+        <label>Password <input name="password" type="password" required autocomplete="current-password"></label>
+      </div>
+      <button class="btn primary" type="submit">Connect</button>
+      <p id="setup-error" class="error" role="alert"></p>
+    </form>
+  </main>
+
   <!-- login -->
   <main id="login" class="login hidden">
     <form id="login-form" class="card login-card" autocomplete="on">
-      <div class="brand"><img src="favicon.svg" alt="" class="brand-icon"> ntfy admin</div>
+      <div class="brand"><img src="favicon.svg" alt="" class="brand-icon"> ntfy admin <span class="super-only badge super">SUPER</span></div>
       <p class="muted">Log in with an ntfy <b>admin</b> account.</p>
-      <label>Username <input name="username" autocomplete="username" required autofocus></label>
+      <label id="login-server-row">Server <select name="server" id="login-server"></select></label>
+      <label>Username <input name="username" autocomplete="username" required></label>
       <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
       <button class="btn primary" type="submit">Log in</button>
       <p id="login-error" class="error" role="alert"></p>
@@ -24,8 +47,12 @@
 
   <!-- app -->
   <div id="app" class="hidden">
+    <div class="super-banner super-only" role="note">
+      SUPER ADMIN MODE: admin socket, full powers (roles, admin users). Do what you came for and leave.
+    </div>
     <header class="topbar">
       <div class="brand"><img src="favicon.svg" alt="" class="brand-icon"> ntfy admin</div>
+      <select id="server-switch" class="server-switch" aria-label="Server"></select>
       <div id="server-info" class="server-info"></div>
       <div class="spacer"></div>
       <span id="whoami" class="muted"></span>
@@ -37,6 +64,7 @@
       <button class="tab" data-tab="topics" role="tab">Topics</button>
       <button class="tab" data-tab="matrix" role="tab">Access matrix</button>
       <button class="tab" data-tab="everyone" role="tab">Anonymous</button>
+      <button class="tab" data-tab="servers" role="tab">Servers</button>
     </nav>
 
     <div id="banner" class="banner hidden"></div>
@@ -45,7 +73,7 @@
       <div class="toolbar">
         <input id="user-filter" class="search" placeholder="Filter users…" type="search">
         <div class="spacer"></div>
-        <a id="export" class="btn ghost" href="api/export">Export YAML</a>
+        <a id="export" class="btn ghost" href="#">Export YAML</a>
         <button id="add-user" class="btn primary">+ New user</button>
       </div>
       <div id="users" class="users"></div>
@@ -63,11 +91,21 @@
     <section id="tab-matrix" class="tabpanel hidden">
       <p class="muted">Effective permission per user and topic, resolved like ntfy does: the user's own most specific rule,
         then the anonymous rules, then the server default. Click a cell to set an exact rule.</p>
+      <div id="matrix-legend" class="legend"></div>
       <div id="matrix" class="matrix-wrap"></div>
     </section>
 
     <section id="tab-everyone" class="tabpanel hidden">
       <div id="everyone"></div>
+    </section>
+
+    <section id="tab-servers" class="tabpanel hidden">
+      <div class="toolbar">
+        <p class="muted grow">ntfy servers this panel manages. Each has its own admin login.
+          The public URL is what phones use; QR codes and examples are built from it.</p>
+        <button id="add-server" class="btn primary">+ Add server</button>
+      </div>
+      <div id="servers"></div>
     </section>
   </div>
 

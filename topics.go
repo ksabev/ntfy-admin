@@ -12,7 +12,7 @@ import (
 
 // ntfy has no topic registry: topics exist the moment someone publishes. The
 // panel keeps optional notes per topic (a display name for the phone app and a
-// line of description) in DATA_DIR/topics.json. No secrets in there.
+// line of description), one file per server: DATA_DIR/notes/<server>.json.
 type topicNote struct {
 	Display string `json:"display,omitempty" yaml:"display,omitempty"`
 	About   string `json:"about,omitempty" yaml:"about,omitempty"`
@@ -25,30 +25,18 @@ type topicStore struct {
 	writable bool
 }
 
-func newTopicStore(dir string) *topicStore {
-	s := &topicStore{path: filepath.Join(dir, "topics.json"), notes: map[string]topicNote{}}
-	data, err := os.ReadFile(s.path)
+func newTopicStore(path string, writable bool) *topicStore {
+	s := &topicStore{path: path, notes: map[string]topicNote{}, writable: writable}
+	data, err := os.ReadFile(path)
 	switch {
 	case err == nil:
 		if err := json.Unmarshal(data, &s.notes); err != nil {
-			slog.Warn("topics.json unreadable, starting empty", "err", err)
+			slog.Warn("topic notes unreadable, starting empty", "file", path, "err", err)
 			s.notes = map[string]topicNote{}
 		}
 	case errors.Is(err, fs.ErrNotExist):
 	default:
-		slog.Warn("cannot read topics.json", "err", err)
-	}
-	// probe writability once, so the UI can say so instead of failing on save
-	if err := os.MkdirAll(dir, 0o750); err == nil {
-		probe := filepath.Join(dir, ".write-test")
-		if f, err := os.Create(probe); err == nil {
-			f.Close()
-			os.Remove(probe)
-			s.writable = true
-		}
-	}
-	if !s.writable {
-		slog.Warn("data dir not writable; topic notes are read-only", "dir", dir)
+		slog.Warn("cannot read topic notes", "file", path, "err", err)
 	}
 	return s
 }
@@ -84,6 +72,9 @@ func (s *topicStore) remove(topic string) error {
 }
 
 func (s *topicStore) saveLocked() error {
+	if err := os.MkdirAll(filepath.Dir(s.path), 0o750); err != nil {
+		return err
+	}
 	data, err := json.MarshalIndent(s.notes, "", "  ")
 	if err != nil {
 		return err

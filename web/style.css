@@ -208,3 +208,47 @@ pre.snippet { background: var(--surface-2); padding: 10px 12px; border-radius: 8
 @media print {
   .topbar, .tabs, .toolbar, .btn, .banner { display: none !important; }
 }
+
+/* --- multi-server bits ------------------------------------------------------------ */
+.server-switch { font-weight: 600; max-width: 220px; }
+.login-card.wide { width: 460px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
+.servers-table td { vertical-align: top; }
+.super-only { display: none; }
+.super-strip { display: none; }
+
+/* --- SUPER ADMIN MODE: red, striped, a little uncomfortable on purpose ------------- */
+body.super {
+  --accent: #c0392b;
+  --accent-ink: #ffffff;
+  --accent-soft: #fbe3df;
+  --bg: #fbf1ef;
+  --surface-2: #f8e6e2;
+  --border: #ecc9c2;
+}
+@media (prefers-color-scheme: dark) {
+  body.super {
+    --accent: #ff6b5a;
+    --accent-ink: #1a0b09;
+    --accent-soft: #3d1611;
+    --bg: #1b1011;
+    --surface: #221416;
+    --surface-2: #2c1a1c;
+    --border: #4a2a2c;
+  }
+}
+body.super .super-only { display: revert; }
+body.super label.super-only { display: flex; }
+.row2 input { width: 100%; }
+body.super .super-strip {
+  display: block; position: sticky; top: 0; z-index: 10; height: 6px;
+  background: repeating-linear-gradient(-45deg, #c0392b 0 12px, #1c1c1c 12px 24px);
+}
+body.super .super-banner {
+  display: block; padding: 7px 20px; font-weight: 700; letter-spacing: .02em; font-size: 13px;
+  color: #fff; background: #a93226; text-align: center;
+}
+body.super .topbar { background: var(--surface); border-bottom: 2px solid var(--accent); }
+body.super .tab.active { border-bottom-color: var(--accent); color: var(--accent); }
+.badge.super { background: #c0392b; color: #fff; }

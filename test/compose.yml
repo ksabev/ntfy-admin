@@ -1,7 +1,12 @@
-# Local test bed: real ntfy + two panels (admin socket / plain HTTP).
+# Local test bed: real ntfy + the panel twice: regular admin and super admin.
 #   docker compose -f test/compose.yml up -d --build && test/e2e.sh
 # Reachable from the LAN: BIND=0.0.0.0 TEST_HOST=<this host> docker compose ... up -d
 name: ntfy-admin-test
+x-seed: &seed
+  NTFY_ADMIN_SERVER_NAME: Test
+  NTFY_ADMIN_NTFY_URL: http://ntfy:80
+  NTFY_ADMIN_PUBLIC_URL: http://${TEST_HOST:-localhost}:18080
+  NTFY_ADMIN_SOCKET: /run/ntfy/admin.sock
 services:
   ntfy:
     image: binwiederhier/ntfy:v2.37.2
@@ -16,26 +21,25 @@ services:
       - ntfy-run:/run/ntfy
     ports: ["${BIND:-127.0.0.1}:18080:80"]
 
-  admin-socket:
+  admin:                       # regular admin: HTTP admin API only
     build: ..
-    environment:
-      NTFY_ADMIN_NTFY_URL: http://ntfy:80
-      NTFY_ADMIN_SOCKET: /run/ntfy/admin.sock
-      NTFY_ADMIN_PUBLIC_URL: http://${TEST_HOST:-localhost}:18080
-    group_add: ["0"]          # ntfy runs as root here: socket is root:root 0660
+    environment: *seed
     volumes:
-      - ntfy-run:/run/ntfy
       - panel-data:/data
     ports: ["${BIND:-127.0.0.1}:18081:8080"]
     depends_on: [ntfy]
 
-  admin-http:
+  super:                       # super admin: admin socket, red UI
     build: ..
     environment:
-      NTFY_ADMIN_NTFY_URL: http://ntfy:80
-      NTFY_ADMIN_PUBLIC_URL: https://ntfy.example.com
+      <<: *seed
+      NTFY_ADMIN_SUPER: "true"
+    group_add: ["0"]           # ntfy runs as root here: socket is root:root 0660
+    volumes:
+      - ntfy-run:/run/ntfy
+      - panel-data:/data
     ports: ["${BIND:-127.0.0.1}:18082:8080"]
-    depends_on: [ntfy]
+    depends_on: [ntfy, admin]
 
 volumes:
   ntfy-lib:

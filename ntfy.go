@@ -30,13 +30,13 @@ var socketPaths = map[string]bool{
 	"/v1/users/tokens": true, "/v1/users/password/reset": true, "/v1/tiers": true,
 }
 
-func newNtfyClient(cfg *Config) *NtfyClient {
+func newNtfyClient(sc ServerConfig) *NtfyClient {
 	c := &NtfyClient{
-		base: cfg.NtfyURL,
+		base: strings.TrimRight(sc.URL, "/"),
 		http: &http.Client{Timeout: 20 * time.Second},
 	}
-	if cfg.AdminSocket != "" {
-		path := cfg.AdminSocket
+	if sc.Socket != "" {
+		path := sc.Socket
 		c.socket = &http.Client{
 			Timeout: 20 * time.Second,
 			Transport: &http.Transport{

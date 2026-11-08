@@ -51,12 +51,12 @@ func main() {
 		<-ctx.Done()
 		shutdown, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		app.sessions.closeAll(shutdown, app.ntfy) // revoke our short-lived ntfy session tokens
+		app.sessions.closeAll(shutdown, app.servers) // revoke our short-lived ntfy session tokens
 		_ = srv.Shutdown(shutdown)
 	}()
 
 	slog.Info("ntfy-admin listening", "version", version, "listen", cfg.Listen,
-		"ntfy", cfg.NtfyURL, "admin_socket", cfg.AdminSocket != "")
+		"servers", len(app.servers.list()), "data", cfg.DataDir)
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("server", "err", err)
 		os.Exit(1)
