@@ -1,5 +1,8 @@
 # ntfy-admin
 
+[![CI](https://github.com/ksabev/ntfy-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/ksabev/ntfy-admin/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/ksabev/ntfy-admin)](LICENSE)
+
 **The admin page that self-hosted [ntfy](https://ntfy.sh) never had.**
 
 ntfy has users, access rules and access tokens, but its web app only manages
@@ -38,16 +41,13 @@ password for a short-lived ntfy token and forgets the password. It needs no Dock
 socket and no access to ntfy's files.
 
 It ships as a single static Go binary with a plain HTML/JS UI (no build step, no
-npm). The distroless image is about 10 MB and runs as non-root.
+npm). The distroless image is about 10 MB, runs as non-root, and is published for
+amd64, arm64 and armv7 (Raspberry Pi): `ghcr.io/ksabev/ntfy-admin`.
 
 **Requires ntfy 2.36 or newer** for everything. On older servers, users and access
 rules still work and token management switches itself off.
 
 ## Quick start
-
-```sh
-docker build -t ntfy-admin .
-```
 
 ```yaml
 services:
@@ -63,7 +63,7 @@ services:
     ports: ["8082:80"]
 
   ntfy-admin:
-    image: ntfy-admin
+    image: ghcr.io/ksabev/ntfy-admin:latest
     environment:
       NTFY_ADMIN_NTFY_URL: http://ntfy:80                 # how the panel reaches ntfy
       NTFY_ADMIN_PUBLIC_URL: https://ntfy.example.com     # how phones reach ntfy (QR codes)

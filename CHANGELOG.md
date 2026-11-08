@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 (2026-11-08)
+
+- Published images on `ghcr.io/ksabev/ntfy-admin` for amd64, arm64 and armv7, built
+  by GitHub Actions. CI runs the end-to-end suite against a real ntfy on every push.
+- Documentation points to the published image.
+
 ## 0.2.0 (2026-11-08)
 
 - **Many servers:** add, edit and remove ntfy servers in the UI (`/data/servers.json`).

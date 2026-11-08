@@ -90,6 +90,16 @@ To reach the test bed from other machines:
 `BIND=0.0.0.0 TEST_HOST=<this host> docker compose -f test/compose.yml up -d`.
 Clean up with `docker compose -f test/compose.yml down -v`.
 
+## CI and releases
+
+`.github/workflows/ci.yml` runs on every push and pull request: gofmt, go vet, build,
+a JS syntax check, and the full end-to-end suite against a real ntfy. A push to `main`
+publishes `ghcr.io/ksabev/ntfy-admin:edge`. A `v*` tag publishes the release tags
+(`0.2.1`, `0.2`, `latest`) for amd64, arm64 and armv7.
+
+To make a release: update `CHANGELOG.md`, then
+`git tag -a v0.2.1 -m "…" && git push github main v0.2.1`.
+
 ## Building
 
 ```sh

@@ -27,7 +27,7 @@ services:
 
   # Day-to-day panel: users, rules, tokens, onboarding. HTTP admin API only.
   ntfy-admin:
-    image: ntfy-admin:latest
+    image: ghcr.io/ksabev/ntfy-admin:latest
     environment:
       # Seed the first server on first start; afterwards manage servers in the UI.
       NTFY_ADMIN_SERVER_NAME: Home
@@ -44,7 +44,7 @@ services:
 
   # Rare jobs: roles and admin users, over ntfy's admin socket. Red UI on purpose.
   ntfy-admin-super:
-    image: ntfy-admin:latest
+    image: ghcr.io/ksabev/ntfy-admin:latest
     # ntfy runs as root in its image, so the socket is root:root 0660.
     # gid 0 opens it; the process stays a non-root user. (Or: group_add: ["0"] on compose v2+.)
     user: "65532:0"

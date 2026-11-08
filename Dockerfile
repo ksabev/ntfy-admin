@@ -6,8 +6,8 @@ RUN go mod download
 COPY *.go ./
 COPY web ./web
 ARG VERSION=dev
-ARG TARGETOS TARGETARCH
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+ARG TARGETOS TARGETARCH TARGETVARIANT
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} \
     go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/ntfy-admin . \
  && mkdir -p /out/data
 

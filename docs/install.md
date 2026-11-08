@@ -12,18 +12,23 @@
   docker compose exec ntfy ntfy user add --role=admin admin
   ```
 
-## Build the image
+## Get the image
 
-There is no published image yet. Build it from the repository:
+Images for linux/amd64, linux/arm64 and linux/arm/v7 are built by GitHub Actions:
+
+| Tag | |
+|---|---|
+| `ghcr.io/ksabev/ntfy-admin:latest` | latest release |
+| `ghcr.io/ksabev/ntfy-admin:0.2` / `:0.2.1` | a release line / an exact release |
+| `ghcr.io/ksabev/ntfy-admin:edge` | current `main` |
+
+Pin an exact version in production. To build it yourself:
 
 ```sh
-docker build -t ntfy-admin:latest .
-docker build --build-arg VERSION=0.2.0 -t ntfy-admin:0.2.0 .    # version shows in the UI and /healthz
+docker build --build-arg VERSION=0.2.1 -t ntfy-admin:0.2.1 .    # version shows in the UI and /healthz
 ```
 
-Multi-arch works with buildx: `docker buildx build --platform linux/amd64,linux/arm64 ...`.
-
-To run the image on a host without a registry:
+To copy a self-built image to a host without a registry:
 
 ```sh
 docker save ntfy-admin:0.2.0 | gzip | ssh myhost 'gunzip | docker load'
