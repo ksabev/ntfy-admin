@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2 (2026-11-11)
+
+- Dialogs close after a successful save (new topic note, access rule, server, ...).
+  Before, the form stayed open as if nothing happened.
+- Onboarding: with more than 3 topics the QR codes get smaller; click one to show it
+  alone and large, so the phone can't scan its neighbour by mistake.
+- Onboarding warns that the ntfy app keeps one user per server: adding a second user on
+  a phone replaces the first, and all other topics on that server stop working.
+- Docs: ntfy is dropping the `experimental-` prefix of `listen-admin-unix`.
+
 ## 0.2.1 (2026-11-08)
 
 - Published images on `ghcr.io/ksabev/ntfy-admin` for amd64, arm64 and armv7, built

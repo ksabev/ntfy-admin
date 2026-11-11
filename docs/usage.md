@@ -56,7 +56,15 @@ The token list never contains token values, only the first characters.
 
 The card shows one QR per topic the user can read, including topics they reach
 through a pattern. A topic only counts if the panel knows its name: it is named in a
-rule, or it has a topic note. *Print* gives a paper version.
+rule, or it has a topic note. *Print* gives a paper version. With more than three
+topics the codes get smaller; click one to show it alone and large, so the phone
+doesn't scan the one next to it.
+
+**One user per server on a phone.** The ntfy app keeps a single login per server, and
+all topics of that server share one connection. Adding a second user for the same
+server replaces the first, ntfy then refuses the whole connection, and every topic
+stops (the app reports it as a WebSocket error). To give a phone another topic, grant
+access to the user already on it.
 
 ntfy can't import a login from a QR code. The one-time login is typed in; after
 that, every subscription is a scan.

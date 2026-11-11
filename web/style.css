@@ -189,6 +189,14 @@ pre.snippet { background: var(--surface-2); padding: 10px 12px; border-radius: 8
 .qr { text-align: center; }
 .qr img { width: 100%; max-width: 200px; border-radius: 8px; background: #fff; padding: 6px; }
 .qr .t { font-weight: 600; }
+.qr img { cursor: zoom-in; }
+.qr-grid.compact { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+.qr-grid.compact .qr img { max-width: 120px; }
+.qr-grid.compact .qr .note { display: none; }
+dialog.zoom { text-align: center; cursor: zoom-out; max-width: 92vw; }
+dialog.zoom img { width: min(80vmin, 520px); background: #fff; padding: 12px; border-radius: 10px; display: block; margin: 0 auto 10px; }
+dialog.zoom .t { font-weight: 600; font-size: 1.2em; }
+@media print { .qr-grid.compact { grid-template-columns: repeat(3, 1fr); } .qr-grid.compact .qr img { max-width: 180px; } }
 .offscreen { position: fixed; left: -9999px; top: 0; }
 .radio-row { display: flex; gap: 16px; flex-wrap: wrap; }
 

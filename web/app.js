@@ -162,6 +162,7 @@ const secretBox = (value) => h("div", { class: "secret" }, h("code", {}, value),
 function openDialog({ title, body = [], submit, danger = false, cancel = "Cancel", onSubmit }) {
   const dlg = $("#dialog");
   const form = $("#dialog-form");
+  if (dlg.open) dlg.close();
   form.replaceChildren(
     h("h2", {}, title),
     ...body.filter((n) => n !== null && n !== undefined && n !== false),
@@ -176,8 +177,10 @@ function openDialog({ title, body = [], submit, danger = false, cancel = "Cancel
     const btn = form.querySelector("button[type=submit]");
     btn.disabled = true;
     try {
+      // Only an explicit `true` keeps the dialog: handlers return true on error (so the
+      // user can fix the input) or after opening a follow-up dialog in its place.
       const keep = await onSubmit(new FormData(form));
-      if (!keep) dlg.close();
+      if (keep !== true && form.contains(btn)) dlg.close();
     } catch { /* toast already shown */ } finally { btn.disabled = false; }
   };
   dlg.showModal();
@@ -651,11 +654,15 @@ function onboardingDialog(u, password) {
       password ? h("div", {}, h("div", { class: "warn" }, "Password, shown only now:"), secretBox(password)) : null,
       h("ol", {},
         h("li", {}, "ntfy app → Settings → Manage users → Add user: server, username and password above."),
-        h("li", {}, "Scan a QR code to subscribe to that topic."),
+        h("li", {}, "Scan a QR code to subscribe to that topic. Tap a code to show it alone, bigger."),
       ),
+      h("p", { class: "warn" }, "The ntfy app keeps one user per server, and all topics of a server share it. "
+        + "If this phone is already logged in to this server as someone else, don't add " + u.username
+        + " there: it replaces that login and every other topic stops working. Grant access to the existing user instead."),
       topics.length
-        ? h("div", { class: "qr-grid" }, topics.map((t) => h("div", { class: "qr" },
-          h("img", { src: "api/qr?data=" + encodeURIComponent(deepLink(t.name)), alt: "QR code for " + t.name, loading: "lazy" }),
+        ? h("div", { class: "qr-grid" + (topics.length > 3 ? " compact" : "") }, topics.map((t) => h("div", { class: "qr" },
+          h("img", { src: "api/qr?data=" + encodeURIComponent(deepLink(t.name)), alt: "QR code for " + t.name, loading: "lazy",
+            title: "Show this code alone", onclick: () => zoomQR(deepLink(t.name), t.display || t.name, t.name) }),
           h("div", { class: "t" }, t.display || t.name),
           h("div", { class: "mono muted" }, t.name),
           t.about ? h("div", { class: "note" }, t.about) : null)))
@@ -663,6 +670,20 @@ function onboardingDialog(u, password) {
       h("div", { class: "row-btns" }, h("button", { type: "button", class: "btn small", onclick: () => window.print() }, "Print")),
     ],
   });
+}
+
+// One QR code, large and alone, so the phone can't pick up its neighbour. Stacks on top of
+// the open dialog; click anywhere or press Esc to go back.
+function zoomQR(data, label, sub) {
+  const z = $("#zoom");
+  z.replaceChildren(
+    h("img", { src: "api/qr?data=" + encodeURIComponent(data), alt: "QR code for " + label }),
+    h("div", { class: "t" }, label),
+    sub && sub !== label ? h("div", { class: "mono muted" }, sub) : null,
+    h("div", { class: "muted" }, "click to close"),
+  );
+  z.onclick = () => z.close();
+  z.showModal();
 }
 
 // --- topics ---------------------------------------------------------------------------------------
@@ -864,12 +885,14 @@ function serverDialog(s) {
       try {
         if (s) await api("PUT", "servers/" + encodeURIComponent(s.id), body);
         else await api("POST", "servers", body);
-        toast(s ? "Saved" : "Added: log in to it from this list");
+      } catch (e) { if (!(e instanceof LoginNeeded)) toast(e.message, true); return true; }
+      toast(s ? "Saved" : "Added: log in to it from this list");
+      try {
         await loadPanel();
         me = await api("GET", "me");
         if (!me.logins[cur]) { showLogin("Log in to " + serverName(cur), cur); return; }
         await refresh();
-      } catch (e) { if (!(e instanceof LoginNeeded)) toast(e.message, true); return true; }
+      } catch (e) { if (!(e instanceof LoginNeeded)) toast(e.message, true); }
     },
   });
 }

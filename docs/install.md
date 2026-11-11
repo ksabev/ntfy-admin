@@ -19,13 +19,13 @@ Images for linux/amd64, linux/arm64 and linux/arm/v7 are built by GitHub Actions
 | Tag | |
 |---|---|
 | `ghcr.io/ksabev/ntfy-admin:latest` | latest release |
-| `ghcr.io/ksabev/ntfy-admin:0.2` / `:0.2.1` | a release line / an exact release |
+| `ghcr.io/ksabev/ntfy-admin:0.2` / `:0.2.2` | a release line / an exact release |
 | `ghcr.io/ksabev/ntfy-admin:edge` | current `main` |
 
 Pin an exact version in production. To build it yourself:
 
 ```sh
-docker build --build-arg VERSION=0.2.1 -t ntfy-admin:0.2.1 .    # version shows in the UI and /healthz
+docker build --build-arg VERSION=0.2.2 -t ntfy-admin:0.2.2 .    # version shows in the UI and /healthz
 ```
 
 To copy a self-built image to a host without a registry:
@@ -59,7 +59,8 @@ watches `servers.json` for changes.
 ### The admin socket
 
 ntfy 2.36+ can serve its admin API on a unix socket
-(`experimental-listen-admin-unix`, still marked experimental). **Opening the socket
+(`experimental-listen-admin-unix`; newer ntfy releases drop the prefix and call it
+`listen-admin-unix`). **Opening the socket
 is the authorization**: there is no password. Mount it only into the super panel.
 
 ntfy creates the socket with mode `0660` in a directory with mode `0750`, owned by
