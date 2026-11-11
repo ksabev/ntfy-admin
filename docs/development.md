@@ -95,9 +95,12 @@ Clean up with `docker compose -f test/compose.yml down -v`.
 `.github/workflows/ci.yml` runs on every push and pull request: gofmt, go vet, build,
 a JS syntax check, and the full end-to-end suite against a real ntfy. A push to `main`
 publishes `ghcr.io/ksabev/ntfy-admin:edge`. A `v*` tag publishes the release tags
-(`0.2.1`, `0.2`, `latest`) for amd64, arm64 and armv7.
+(`0.2.2`, `0.2`, `latest`) for amd64, arm64 and armv7, then creates the GitHub Release
+with that version's section of `CHANGELOG.md` as its notes
+(`scripts/release-notes.sh 0.2.2` prints it). A tag without a changelog section fails
+the release job.
 
-To make a release: update `CHANGELOG.md`, push `main`, then tag and push the tag **on
+To make a release: add a `## X.Y.Z (date)` section to `CHANGELOG.md`, push `main`, then tag and push the tag **on
 its own**. If the branch and the tag go in one push, GitHub can skip the tag event and
 no release image gets built:
 
