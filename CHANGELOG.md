@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3 (2026-11-18)
+
+- `NTFY_ADMIN_BASE_PATH` works behind proxies that strip the sub-path, such as Apache
+  with `ProxyPass /admin http://host:port`, as well as those that forward it
+  ([#1](https://github.com/ksabev/ntfy-admin/issues/1)).
+- Docs: Apache example for running under a sub-path.
+
 ## 0.2.2 (2026-11-11)
 
 - Dialogs close after a successful save (new topic note, access rule, server, ...).

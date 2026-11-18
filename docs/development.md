@@ -12,6 +12,7 @@ app.go         routing, auth middleware, login/setup, server management
 handlers.go    per-server handlers: state, users, access, tokens, topics, publish, QR, export
 topics.go      topic notes per server (DATA_DIR/notes/<id>.json)
 web/           the UI: index.html, app.js, style.css (embedded into the binary)
+basepath.go    NTFY_ADMIN_BASE_PATH: works with and without the prefix in the forwarded path
 test/          docker compose test bed + end-to-end tests
 scripts/       deprovision.py (migration helper)
 ```
@@ -95,9 +96,9 @@ Clean up with `docker compose -f test/compose.yml down -v`.
 `.github/workflows/ci.yml` runs on every push and pull request: gofmt, go vet, build,
 a JS syntax check, and the full end-to-end suite against a real ntfy. A push to `main`
 publishes `ghcr.io/ksabev/ntfy-admin:edge`. A `v*` tag publishes the release tags
-(`0.2.2`, `0.2`, `latest`) for amd64, arm64 and armv7, then creates the GitHub Release
+(`0.2.3`, `0.2`, `latest`) for amd64, arm64 and armv7, then creates the GitHub Release
 with that version's section of `CHANGELOG.md` as its notes
-(`scripts/release-notes.sh 0.2.2` prints it). A tag without a changelog section fails
+(`scripts/release-notes.sh 0.2.3` prints it). A tag without a changelog section fails
 the release job.
 
 To make a release: add a `## X.Y.Z (date)` section to `CHANGELOG.md`, push `main`, then tag and push the tag **on

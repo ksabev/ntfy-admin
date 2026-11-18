@@ -19,13 +19,13 @@ Images for linux/amd64, linux/arm64 and linux/arm/v7 are built by GitHub Actions
 | Tag | |
 |---|---|
 | `ghcr.io/ksabev/ntfy-admin:latest` | latest release |
-| `ghcr.io/ksabev/ntfy-admin:0.2` / `:0.2.2` | a release line / an exact release |
+| `ghcr.io/ksabev/ntfy-admin:0.2` / `:0.2.3` | a release line / an exact release |
 | `ghcr.io/ksabev/ntfy-admin:edge` | current `main` |
 
 Pin an exact version in production. To build it yourself:
 
 ```sh
-docker build --build-arg VERSION=0.2.2 -t ntfy-admin:0.2.2 .    # version shows in the UI and /healthz
+docker build --build-arg VERSION=0.2.3 -t ntfy-admin:0.2.3 .    # version shows in the UI and /healthz
 ```
 
 To copy a self-built image to a host without a registry:
@@ -105,7 +105,7 @@ Everything is set through environment variables.
 | `NTFY_ADMIN_LISTEN` | `:8080` | Listen address |
 | `NTFY_ADMIN_DATA_DIR` | `/data` | Data directory |
 | `NTFY_ADMIN_SESSION_TTL` | `12h` | How long a login lasts (minimum `5m`) |
-| `NTFY_ADMIN_BASE_PATH` | (none) | Serve under a sub-path, e.g. `/admin` |
+| `NTFY_ADMIN_BASE_PATH` | (none) | Serve under a sub-path, e.g. `/admin`. The proxy may forward the sub-path or strip it |
 | `NTFY_ADMIN_BEHIND_PROXY` | `false` | Take the client IP from `X-Forwarded-For` |
 | `NTFY_ADMIN_COOKIE_SECURE` | `auto` | `auto`: `Secure` cookie when the request came over HTTPS (or `X-Forwarded-Proto: https`) |
 
@@ -150,6 +150,20 @@ location /admin/ {
     proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
+
+**Apache**, under a sub-path (`NTFY_ADMIN_BASE_PATH=/admin`; needs `mod_proxy`,
+`mod_proxy_http` and `mod_headers`):
+
+```apache
+ProxyPass /admin http://127.0.0.1:8080
+ProxyPassReverse /admin http://127.0.0.1:8080
+RequestHeader set X-Forwarded-Proto "https"
+```
+
+Leave out the last line if the site is served over plain HTTP.
+
+With `NTFY_ADMIN_BASE_PATH` set, it doesn't matter whether the proxy forwards the
+sub-path (the nginx example) or strips it (the Apache example).
 
 Keep the super panel off the proxy if you can: reach it on a LAN address or through
 an SSH tunnel (`ssh -L 8084:localhost:8084 myhost`).

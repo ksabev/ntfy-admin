@@ -198,6 +198,15 @@ func (a *App) routes() http.Handler {
 	mux.Handle("GET "+p+"/", http.StripPrefix(p+"/", http.FileServer(http.FS(static))))
 	if p != "" {
 		mux.Handle("GET "+p, http.RedirectHandler(p+"/", http.StatusMovedPermanently))
+		index, err := fs.ReadFile(static, "index.html")
+		if err != nil {
+			panic(err) // embedded at build time
+		}
+		index = indexWithBase(index, p)
+		mux.HandleFunc("GET "+p+"/{$}", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			_, _ = w.Write(index)
+		})
 	}
 	mux.HandleFunc("GET "+p+"/healthz", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{"ok": true, "version": version})
@@ -232,17 +241,21 @@ func (a *App) routes() http.Handler {
 	mux.HandleFunc("POST "+s+"/publish", a.scoped(a.handlePublish))
 	mux.HandleFunc("GET "+s+"/export", a.scoped(a.handleExport))
 
-	return securityHeaders(mux)
+	baseURI := "'none'"
+	if p != "" {
+		baseURI = "'self'" // the page carries a <base> tag, see indexWithBase
+	}
+	return securityHeaders(baseURI, withBasePath(p, mux))
 }
 
-func securityHeaders(next http.Handler) http.Handler {
+func securityHeaders(baseURI string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := w.Header()
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "no-referrer")
 		h.Set("Content-Security-Policy",
-			"default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+			"default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri "+baseURI+"; form-action 'self'")
 		if strings.Contains(r.URL.Path, "/api/") {
 			h.Set("Cache-Control", "no-store")
 		}
