@@ -13,7 +13,7 @@
   <div class="super-strip" aria-hidden="true"></div>
 
   <!-- first start: no servers yet -->
-  <main id="setup" class="login hidden">
+  <main id="setup" class="login" hidden>
     <form id="setup-form" class="card login-card wide" autocomplete="off">
       <div class="brand"><img src="favicon.svg" alt="" class="brand-icon"> ntfy admin <span class="super-only badge super">SUPER</span></div>
       <h2>Connect your ntfy server</h2>
@@ -33,7 +33,7 @@
   </main>
 
   <!-- login -->
-  <main id="login" class="login hidden">
+  <main id="login" class="login" hidden>
     <form id="login-form" class="card login-card" autocomplete="on">
       <div class="brand"><img src="favicon.svg" alt="" class="brand-icon"> ntfy admin <span class="super-only badge super">SUPER</span></div>
       <p class="muted">Log in with an ntfy <b>admin</b> account.</p>
@@ -46,7 +46,7 @@
   </main>
 
   <!-- app -->
-  <div id="app" class="hidden">
+  <div id="app" hidden>
     <div class="super-banner super-only" role="note">
       SUPER ADMIN MODE: admin socket, full powers (roles, admin users). Do what you came for and leave.
     </div>
@@ -67,7 +67,7 @@
       <button class="tab" data-tab="servers" role="tab">Servers</button>
     </nav>
 
-    <div id="banner" class="banner hidden"></div>
+    <div id="banner" class="banner" hidden></div>
 
     <section id="tab-users" class="tabpanel">
       <div class="toolbar">
@@ -79,7 +79,7 @@
       <div id="users" class="users"></div>
     </section>
 
-    <section id="tab-topics" class="tabpanel hidden">
+    <section id="tab-topics" class="tabpanel" hidden>
       <div class="toolbar">
         <p class="muted grow">ntfy has no topic list: these are topics named in access rules, plus the ones you added notes to.
           Notes give phones a friendly name when subscribing by QR.</p>
@@ -88,18 +88,18 @@
       <div id="topics"></div>
     </section>
 
-    <section id="tab-matrix" class="tabpanel hidden">
+    <section id="tab-matrix" class="tabpanel" hidden>
       <p class="muted">Effective permission per user and topic, resolved like ntfy does: the user's own most specific rule,
         then the anonymous rules, then the server default. Click a cell to set an exact rule.</p>
       <div id="matrix-legend" class="legend"></div>
       <div id="matrix" class="matrix-wrap"></div>
     </section>
 
-    <section id="tab-everyone" class="tabpanel hidden">
+    <section id="tab-everyone" class="tabpanel" hidden>
       <div id="everyone"></div>
     </section>
 
-    <section id="tab-servers" class="tabpanel hidden">
+    <section id="tab-servers" class="tabpanel" hidden>
       <div class="toolbar">
         <p class="muted grow">ntfy servers this panel manages. Each has its own admin login.
           The public URL is what phones use; QR codes and examples are built from it.</p>

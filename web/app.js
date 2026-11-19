@@ -194,7 +194,7 @@ function confirmDialog(title, text, submit, fn) {
 
 // --- screens ----------------------------------------------------------------------------------
 function screen(name) {
-  for (const id of ["setup", "login", "app"]) $("#" + id).classList.toggle("hidden", id !== name);
+  for (const id of ["setup", "login", "app"]) $("#" + id).hidden = id !== name;
   if ($("#dialog").open) $("#dialog").close();
 }
 
@@ -211,7 +211,7 @@ function showLogin(msg = "", serverId = null) {
   const sel = $("#login-server");
   const list = (panel && panel.servers) || [];
   sel.replaceChildren(...list.map((s) => h("option", { value: s.id, selected: s.id === serverId }, s.name)));
-  $("#login-server-row").classList.toggle("hidden", list.length < 2);
+  $("#login-server-row").hidden = list.length < 2;
   // a way back while still logged in to other servers
   const form = $("#login-form");
   form.querySelector(".back")?.remove();
@@ -277,7 +277,7 @@ $("#logout").addEventListener("click", async () => {
 document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => selectTab(b.dataset.tab)));
 function selectTab(name) {
   document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
-  document.querySelectorAll(".tabpanel").forEach((p) => p.classList.toggle("hidden", p.id !== "tab-" + name));
+  document.querySelectorAll(".tabpanel").forEach((p) => { p.hidden = p.id !== "tab-" + name; });
   store.set("tab", name);
 }
 
@@ -310,6 +310,9 @@ async function refresh() {
 }
 
 (async function boot() {
+  // Wait for the stylesheet before showing a screen or focusing a field: Firefox may run
+  // deferred scripts first, and focus() would then lay out the unstyled page (issue #2).
+  if (document.readyState !== "complete") await new Promise((r) => window.addEventListener("load", r, { once: true }));
   try { await loadPanel(); } catch { toast("Cannot reach the panel", true); return; }
   if (panel.setup_needed) {
     screen("setup");
@@ -358,7 +361,7 @@ function renderServer() {
   if (!state.notes_writable) notes.push("Data dir is not writable: topic notes are read-only. Mount a volume at /data.");
   const b = $("#banner");
   b.textContent = notes.join(" ");
-  b.classList.toggle("hidden", notes.length === 0);
+  b.hidden = notes.length === 0;
 }
 
 function userBadges(u) {

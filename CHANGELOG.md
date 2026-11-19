@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.4 (2026-11-19)
+
+- No more flash of unstyled content on page load in Firefox
+  ([#2](https://github.com/ksabev/ntfy-admin/issues/2)). Screens start hidden with the
+  `hidden` attribute instead of a CSS class, and the UI starts after the stylesheet has
+  loaded.
+
 ## 0.2.3 (2026-11-18)
 
 - `NTFY_ADMIN_BASE_PATH` works behind proxies that strip the sub-path, such as Apache

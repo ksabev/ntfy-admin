@@ -19,13 +19,13 @@ Images for linux/amd64, linux/arm64 and linux/arm/v7 are built by GitHub Actions
 | Tag | |
 |---|---|
 | `ghcr.io/ksabev/ntfy-admin:latest` | latest release |
-| `ghcr.io/ksabev/ntfy-admin:0.2` / `:0.2.3` | a release line / an exact release |
+| `ghcr.io/ksabev/ntfy-admin:0.2` / `:0.2.4` | a release line / an exact release |
 | `ghcr.io/ksabev/ntfy-admin:edge` | current `main` |
 
 Pin an exact version in production. To build it yourself:
 
 ```sh
-docker build --build-arg VERSION=0.2.3 -t ntfy-admin:0.2.3 .    # version shows in the UI and /healthz
+docker build --build-arg VERSION=0.2.4 -t ntfy-admin:0.2.4 .    # version shows in the UI and /healthz
 ```
 
 To copy a self-built image to a host without a registry:
